@@ -27,19 +27,6 @@ type gameResource struct {
 	gameClient pb.GameClient
 }
 
-// func (gr *gameResource) AddPlayer(writer http.ResponseWriter, request *http.Request) {
-// 	_, err := gr.gameClient.AddPlayer(context.Background(), &pb.AddPlayerRequest{
-// 		Name: request.URL.Query().Get(playerName),
-// 	})
-
-// 	if err != nil {
-// 		writer.WriteHeader(500)
-// 		respondError(writer, err)
-// 	} else {
-// 		respondSuccess(writer)
-// 	}
-// }
-
 func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.Request) {
 	highScoreString := request.URL.Query().Get(highScore)
 	highScoreFloat64, _ := strconv.ParseFloat(highScoreString, 64)
