@@ -9,6 +9,7 @@ import (
 	"net/http"
 	// "fmt"
 	"strconv"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -40,6 +41,32 @@ func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.R
 	} else {
 		respondSuccess(writer)
 	}
+}
+
+// NewGrpcGameServiceClient dials grpc connection and returns client and error
+func NewGrpcGameServiceClient(serverAddr string) (pb.GameClient, error) {
+	// tracers will default to a NOOP tracer if nothing was configured
+	// streamTracingInterceptor := grpc_opentracing.StreamClientInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer()))
+	// unaryTracingInterceptor := grpc_opentracing.UnaryClientInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer()))
+
+	// serverOpts := []grpc.DialOption{
+	// 	grpc.WithStreamInterceptor(streamTracingInterceptor),
+	// 	grpc.WithUnaryInterceptor(unaryTracingInterceptor),
+	// 	grpc.WithInsecure()}
+
+	// conn, err := grpc.Dial(serverAddr, serverOpts...)
+	conn, err := grpc.Dial(serverAddr)
+
+	if err != nil {
+		log.Fatal().Msgf("Failed to dial: %v", err)
+		return nil, err
+	} else {
+		log.Info().Msgf("Successfully connected to [%s]", serverAddr)
+	}
+
+	client := pb.NewGameClient(conn)
+
+	return client, nil
 }
 
 func getError(err error) []byte {
