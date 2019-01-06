@@ -14,6 +14,7 @@ import (
 	// "github.com/pkg/errors"
 	// "os"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 var router *gin.Engine
@@ -61,6 +62,13 @@ func main() {
 	}
 
 	log.Info().Msgf("Started HTTP-Service at [%s]", *serverAddr)
+}
+
+func handleGet(c *gin.Context) {
+	bsString := strconv.FormatFloat(bestScore, 'e', -1, 64)
+	c.JSONP(200, gin.H{
+		"hs": bsString,
+	})
 }
 
 // setupOpentracing sets up the configuration of the opentracing communication with the jaeger agent.
