@@ -2,18 +2,22 @@ package main
 
 import (
 	"flag"
-	"github.com/Graphmasters/workshop-bff/bff"
-	"github.com/gorilla/mux"
+	// "github.com/Graphmasters/workshop-bff/bff"
+	// "github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
+	"github.com/teach/ms-bff/bff"
 	"net/http"
 	// "time"
-
 	// jaegercfg "github.com/uber/jaeger-client-go/config"
 	// jaegerlog "github.com/uber/jaeger-client-go/log"
 	// "github.com/uber/jaeger-lib/metrics"
 	// "github.com/pkg/errors"
 	// "os"
+	"github.com/gin-gonic/gin"
 )
+
+var router *gin.Engine
+var bestScore = 999999.0
 
 func main() {
 	grpcAddr := flag.String("address-game-service-grpc", ":8082", "The GRPC server address")
@@ -44,16 +48,13 @@ func main() {
 	gameClient, err := bff.NewGrpcGameServiceClient(*grpcAddr)
 	gr := bff.NewGameResource(gameClient)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/v1/quiplash/addPlayer", gr.AddPlayer).Methods(http.MethodGet)
-	router.HandleFunc("/v1/quiplash/start", gr.Start).Methods(http.MethodGet)
-	router.HandleFunc("/v1/quiplash/getQuestion", gr.GetQuestion).Methods(http.MethodGet)
-	router.HandleFunc("/v1/quiplash/postAnswer", gr.PostAnswer).Methods(http.MethodPost)
-	router.HandleFunc("/v1/quiplash/getVotePair", gr.GetVotePair).Methods(http.MethodGet)
-	router.HandleFunc("/v1/quiplash/castVote", gr.CastVote).Methods(http.MethodGet)
-	router.HandleFunc("/v1/quiplash/voteResult", gr.VoteResult).Methods(http.MethodGet)
+	// router := mux.NewRouter()
+	// router.HandleFunc("/v1/quiplash/addPlayer", gr.AddPlayer).Methods(http.MethodGet)
+	router = gin.Default()
+	router.GET("/getbs", handleGet)
+	err = router.Run(*serverAddr)
 
-	err = http.ListenAndServe(*serverAddr, router)
+	// err = http.ListenAndServe(*serverAddr, router)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("Could not init server")
