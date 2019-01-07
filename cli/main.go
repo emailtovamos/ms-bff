@@ -6,7 +6,7 @@ import (
 	// "github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 	"github.com/teach/ms-bff/bff"
-	"net/http"
+	// "net/http"
 	// "time"
 	// jaegercfg "github.com/uber/jaeger-client-go/config"
 	// jaegerlog "github.com/uber/jaeger-client-go/log"
@@ -14,14 +14,14 @@ import (
 	// "github.com/pkg/errors"
 	// "os"
 	"github.com/gin-gonic/gin"
-	"strconv"
+	// "strconv"
 )
 
 var router *gin.Engine
 var bestScore = 999999.0
 
 func main() {
-	grpcAddr := flag.String("address-game-service-grpc", ":8082", "The GRPC server address")
+	// grpcAddr := flag.String("address-game-service-grpc", ":8082", "The GRPC server address")
 	serverAddr := flag.String("address-http", ":8081", "The HTTP server address")
 
 	// opentracingAgentUrl := flag.String("opentracing-agent-url", "localhost:6831", "UDP host:port of the remote tracing agent to send traces to.")
@@ -46,14 +46,19 @@ func main() {
 	// 	}
 	// }()
 
-	gameClient, err := bff.NewGrpcGameServiceClient(*grpcAddr)
-	gr := bff.NewGameResource(gameClient)
+	// gameClient, err := bff.NewGrpcGameServiceClient(*grpcAddr)
+	// gr := bff.NewGameResource(gameClient)
+
+	// Let's first get things running without the bff actually connecting to ms-highscore
+	// But rather bff acts like a fake full backend and it itself returns some highscore
+	// If this works fine then only start ms-highscore service and then connect bff and this
+	gr := bff.NewGameResourceTemp()
 
 	// router := mux.NewRouter()
 	// router.HandleFunc("/v1/quiplash/addPlayer", gr.AddPlayer).Methods(http.MethodGet)
 	router = gin.Default()
-	router.GET("/getbs", handleGet)
-	err = router.Run(*serverAddr)
+	router.GET("/getbs", gr.HandleGet)
+	err := router.Run(*serverAddr)
 
 	// err = http.ListenAndServe(*serverAddr, router)
 
@@ -62,13 +67,6 @@ func main() {
 	}
 
 	log.Info().Msgf("Started HTTP-Service at [%s]", *serverAddr)
-}
-
-func handleGet(c *gin.Context) {
-	bsString := strconv.FormatFloat(bestScore, 'e', -1, 64)
-	c.JSONP(200, gin.H{
-		"hs": bsString,
-	})
 }
 
 // setupOpentracing sets up the configuration of the opentracing communication with the jaeger agent.

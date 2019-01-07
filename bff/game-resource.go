@@ -8,8 +8,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/http"
 	// "fmt"
-	"strconv"
+	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	"strconv"
 )
 
 const (
@@ -18,10 +19,16 @@ const (
 	highScore  = "highScore"
 )
 
+var bestScore = 999999.0
+
 func NewGameResource(gameClient pb.GameClient) *gameResource {
 	return &gameResource{
 		gameClient: gameClient,
 	}
+}
+
+func NewGameResourceTemp() *gameResource {
+	return &gameResource{}
 }
 
 type gameResource struct {
@@ -43,6 +50,26 @@ func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.R
 	}
 }
 
+func (gr *gameResource) GetHighScore(writer http.ResponseWriter, request *http.Request) {
+
+	// highScoreResponse, err := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
+	_, err := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
+
+	if err != nil {
+		writer.WriteHeader(500)
+		respondError(writer, err)
+	} else {
+		respondSuccess(writer)
+	}
+}
+
+func (gr *gameResource) HandleGet(c *gin.Context) {
+	bsString := strconv.FormatFloat(bestScore, 'e', -1, 64)
+	c.JSONP(200, gin.H{
+		"hs": bsString,
+	})
+}
+
 // NewGrpcGameServiceClient dials grpc connection and returns client and error
 func NewGrpcGameServiceClient(serverAddr string) (pb.GameClient, error) {
 	// tracers will default to a NOOP tracer if nothing was configured
@@ -55,7 +82,7 @@ func NewGrpcGameServiceClient(serverAddr string) (pb.GameClient, error) {
 	// 	grpc.WithInsecure()}
 
 	// conn, err := grpc.Dial(serverAddr, serverOpts...)
-	conn, err := grpc.Dial(serverAddr)
+	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
 
 	if err != nil {
 		log.Fatal().Msgf("Failed to dial: %v", err)
