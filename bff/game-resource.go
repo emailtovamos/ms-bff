@@ -50,17 +50,22 @@ func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.R
 	}
 }
 
-func (gr *gameResource) GetHighScore(writer http.ResponseWriter, request *http.Request) {
+// func (gr *gameResource) GetHighScore(writer http.ResponseWriter, request *http.Request) {
+func (gr *gameResource) GetHighScore(c *gin.Context) {
 
-	// highScoreResponse, err := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
-	_, err := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
-
-	if err != nil {
-		writer.WriteHeader(500)
-		respondError(writer, err)
-	} else {
-		respondSuccess(writer)
-	}
+	highScoreResponse, _ := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
+	// TODO: Do error check
+	// _, err := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
+	bsString := strconv.FormatFloat(highScoreResponse.HighScore, 'e', -1, 64)
+	c.JSONP(200, gin.H{
+		"hs": bsString,
+	})
+	// if err != nil {
+	// 	writer.WriteHeader(500)
+	// 	respondError(writer, err)
+	// } else {
+	// 	respondSuccess(writer)
+	// }
 }
 
 func (gr *gameResource) HandleGet(c *gin.Context) {
