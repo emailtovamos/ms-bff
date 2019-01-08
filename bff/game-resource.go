@@ -35,19 +35,27 @@ type gameResource struct {
 	gameClient pb.GameClient
 }
 
-func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.Request) {
-	highScoreString := request.URL.Query().Get(highScore)
+// func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.Request) {
+func (gr *gameResource) SetHighScore(c *gin.Context) {
+	// hs := c.Param("hs")
+	// bestScore, _ = strconv.ParseFloat(hs, 64)
+
+	// c.JSONP(200, gin.H{
+	// 	"hs": hs,
+	// })
+
+	highScoreString := c.Param("hs")
 	highScoreFloat64, _ := strconv.ParseFloat(highScoreString, 64)
-	_, err := gr.gameClient.SetHighScore(context.Background(), &pb.SetHighScoreRequest{
+	_, _ = gr.gameClient.SetHighScore(context.Background(), &pb.SetHighScoreRequest{
 		HighScore: highScoreFloat64,
 	})
 
-	if err != nil {
-		writer.WriteHeader(500)
-		respondError(writer, err)
-	} else {
-		respondSuccess(writer)
-	}
+	// if err != nil {
+	// 	writer.WriteHeader(500)
+	// 	respondError(writer, err)
+	// } else {
+	// 	respondSuccess(writer)
+	// }
 }
 
 // func (gr *gameResource) GetHighScore(writer http.ResponseWriter, request *http.Request) {
