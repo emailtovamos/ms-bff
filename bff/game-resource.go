@@ -2,8 +2,9 @@ package bff
 
 import (
 	"context"
-	// pb "github.com/Graphmasters/go-genproto/workshop/game_engine/v1"
-	pb "github.com/teach/ms-apis/ms-highscore/v1"
+	pbhighscore "github.com/teach/ms-apis/ms-highscore/v1"
+	pbgameengine "github.com/teach/ms-apis/ms-game-engine/v1"
+
 	// "io/ioutil"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -21,7 +22,7 @@ const (
 
 var bestScore = 999999.0
 
-func NewGameResource(gameClient pb.GameClient) *gameResource {
+func NewGameResource(gameClient pbhighscore.GameClient) *gameResource {
 	return &gameResource{
 		gameClient: gameClient,
 	}
@@ -32,48 +33,41 @@ func NewGameResourceTemp() *gameResource {
 }
 
 type gameResource struct {
-	gameClient pb.GameClient
+	gameClient pbhighscore.GameClient
+}
+
+type gameEngineResource struct {
+	gameEngineClient pbgameengine.GameEngineClient
 }
 
 // func (gr *gameResource) SetHighScore(writer http.ResponseWriter, request *http.Request) {
 func (gr *gameResource) SetHighScore(c *gin.Context) {
-	// hs := c.Param("hs")
-	// bestScore, _ = strconv.ParseFloat(hs, 64)
-
-	// c.JSONP(200, gin.H{
-	// 	"hs": hs,
-	// })
 
 	highScoreString := c.Param("hs")
 	highScoreFloat64, _ := strconv.ParseFloat(highScoreString, 64)
-	_, _ = gr.gameClient.SetHighScore(context.Background(), &pb.SetHighScoreRequest{
+	_, _ = gr.gameClient.SetHighScore(context.Background(), &pbhighscore.SetHighScoreRequest{
 		HighScore: highScoreFloat64,
 	})
-
-	// if err != nil {
-	// 	writer.WriteHeader(500)
-	// 	respondError(writer, err)
-	// } else {
-	// 	respondSuccess(writer)
-	// }
 }
 
 // func (gr *gameResource) GetHighScore(writer http.ResponseWriter, request *http.Request) {
 func (gr *gameResource) GetHighScore(c *gin.Context) {
+	if gr.gameClient == nil {
+		log.Error().Msg("nil game client")
+	}
 
-	highScoreResponse, _ := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
+	highScoreResponse, err := gr.gameClient.GetHighScore(context.Background(), &pbhighscore.GetHighScoreRequest{})
+	if err != nil {
+		log.Error().Err(err).Msg("Error while getting high score")
+		log.Panic()
+	}
 	// TODO: Do error check
-	// _, err := gr.gameClient.GetHighScore(context.Background(), &pb.GetHighScoreRequest{})
+	// _, err := gr.gameClient.GetHighScore(context.Background(), &pbhighscore.GetHighScoreRequest{})
 	bsString := strconv.FormatFloat(highScoreResponse.HighScore, 'e', -1, 64)
 	c.JSONP(200, gin.H{
 		"hs": bsString,
 	})
-	// if err != nil {
-	// 	writer.WriteHeader(500)
-	// 	respondError(writer, err)
-	// } else {
-	// 	respondSuccess(writer)
-	// }
+
 }
 
 func (gr *gameResource) HandleGet(c *gin.Context) {
@@ -84,17 +78,8 @@ func (gr *gameResource) HandleGet(c *gin.Context) {
 }
 
 // NewGrpcGameServiceClient dials grpc connection and returns client and error
-func NewGrpcGameServiceClient(serverAddr string) (pb.GameClient, error) {
-	// tracers will default to a NOOP tracer if nothing was configured
-	// streamTracingInterceptor := grpc_opentracing.StreamClientInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer()))
-	// unaryTracingInterceptor := grpc_opentracing.UnaryClientInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer()))
+func NewGrpcGameServiceClient(serverAddr string) (pbhighscore.GameClient, error) {
 
-	// serverOpts := []grpc.DialOption{
-	// 	grpc.WithStreamInterceptor(streamTracingInterceptor),
-	// 	grpc.WithUnaryInterceptor(unaryTracingInterceptor),
-	// 	grpc.WithInsecure()}
-
-	// conn, err := grpc.Dial(serverAddr, serverOpts...)
 	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
 
 	if err != nil {
@@ -103,8 +88,15 @@ func NewGrpcGameServiceClient(serverAddr string) (pb.GameClient, error) {
 	} else {
 		log.Info().Msgf("Successfully connected to [%s]", serverAddr)
 	}
+	if conn == nil {
+		log.Info().Msg("ms-highscore conn is nil in ms-bff")
+	}
 
-	client := pb.NewGameClient(conn)
+	client := pbhighscore.NewGameClient(conn)
+
+	if client == nil {
+		log.Info().Msg("ms-highscore client is nil in ms-bff")
+	}
 
 	return client, nil
 }
