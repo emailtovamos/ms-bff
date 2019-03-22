@@ -11,18 +11,23 @@ var router *gin.Engine
 var bestScore = 999999.0
 
 func main() {
-	grpcAddr := flag.String("address-ms-highscore", "localhost:50051", "The GRPC server address")
+	grpcAddrHighScore := flag.String("address-ms-highscore", "localhost:50051", "The GRPC server address for highscore service")
+	grpcAddrGameEngine:= flag.String("address-ms-game-engine", "localhost:60051", "The GRPC server address for game engine service")
+
 	serverAddr := flag.String("address-http", ":8081", "The HTTP server address")
 
 	flag.Parse()
 
 
-	gameClient, err := bff.NewGrpcGameServiceClient(*grpcAddr)
+	gameClient, err := bff.NewGrpcGameServiceClient(*grpcAddrHighScore)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating a client for ms-highscore")
 	}
-	
-	gr := bff.NewGameResource(gameClient)
+	gameEngineClient, err := bff.NewGrpcGameEngineServiceClient(*grpcAddrGameEngine)
+	if err != nil {
+		log.Error().Err(err).Msg("Error creating a client for ms-highscore")
+	}
+	gr := bff.NewGameResource(gameClient, gameEngineClient)
 
 	// Let's first get things running without the bff actually connecting to ms-highscore
 	// But rather bff acts like a fake full backend and it itself returns some highscore
@@ -37,6 +42,7 @@ func main() {
 	// router.GET("/getbs", gr.HandleGet)
 	router.GET("/getbs", gr.GetHighScore)
 	router.GET("/setbs/:hs", gr.SetHighScore)
+	router.GET("/getsize", gr.GetSize)
 	err = router.Run(*serverAddr)
 
 
@@ -46,4 +52,3 @@ func main() {
 
 	log.Info().Msgf("Started HTTP-Service at [%s]", *serverAddr)
 }
-

@@ -2,8 +2,8 @@ package bff
 
 import (
 	"context"
-	pbhighscore "github.com/teach/ms-apis/ms-highscore/v1"
 	pbgameengine "github.com/teach/ms-apis/ms-game-engine/v1"
+	pbhighscore "github.com/teach/ms-apis/ms-highscore/v1"
 
 	// "io/ioutil"
 	"github.com/rs/zerolog/log"
@@ -22,9 +22,10 @@ const (
 
 var bestScore = 999999.0
 
-func NewGameResource(gameClient pbhighscore.GameClient) *gameResource {
+func NewGameResource(gameClient pbhighscore.GameClient, gameEngineClient pbgameengine.GameEngineClient) *gameResource {
 	return &gameResource{
-		gameClient: gameClient,
+		gameClient:       gameClient,
+		gameEngineClient: gameEngineClient,
 	}
 }
 
@@ -33,7 +34,8 @@ func NewGameResourceTemp() *gameResource {
 }
 
 type gameResource struct {
-	gameClient pbhighscore.GameClient
+	gameClient       pbhighscore.GameClient
+	gameEngineClient pbgameengine.GameEngineClient
 }
 
 type gameEngineResource struct {
@@ -70,6 +72,24 @@ func (gr *gameResource) GetHighScore(c *gin.Context) {
 
 }
 
+// func (gr *gameResource) GetHighScore(writer http.ResponseWriter, request *http.Request) {
+func (gr *gameResource) GetSize(c *gin.Context) {
+	if gr.gameEngineClient == nil {
+		log.Error().Msg("nil gameEngine client")
+	}
+
+	sizeResponse, err := gr.gameEngineClient.GetSize(context.Background(), &pbgameengine.GetSizeRequest{})
+	if err != nil {
+		log.Error().Err(err).Msg("Error while getting high score")
+		log.Panic()
+	}
+
+	c.JSONP(200, gin.H{
+		"size": sizeResponse.GetSize(),
+	})
+
+}
+
 func (gr *gameResource) HandleGet(c *gin.Context) {
 	bsString := strconv.FormatFloat(bestScore, 'e', -1, 64)
 	c.JSONP(200, gin.H{
@@ -77,7 +97,7 @@ func (gr *gameResource) HandleGet(c *gin.Context) {
 	})
 }
 
-// NewGrpcGameServiceClient dials grpc connection and returns client and error
+// NewGrpcGameServiceClient dials grpc connection to highscore service and returns client and error
 func NewGrpcGameServiceClient(serverAddr string) (pbhighscore.GameClient, error) {
 
 	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
@@ -96,6 +116,30 @@ func NewGrpcGameServiceClient(serverAddr string) (pbhighscore.GameClient, error)
 
 	if client == nil {
 		log.Info().Msg("ms-highscore client is nil in ms-bff")
+	}
+
+	return client, nil
+}
+
+// NewGrpcGameEngineServiceClient dials grpc connection to game engine service and returns client and error
+func NewGrpcGameEngineServiceClient(serverAddr string) (pbgameengine.GameEngineClient, error) {
+
+	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
+
+	if err != nil {
+		log.Fatal().Msgf("Failed to dial: %v", err)
+		return nil, err
+	} else {
+		log.Info().Msgf("Successfully connected to [%s]", serverAddr)
+	}
+	if conn == nil {
+		log.Info().Msg("ms-game-engine conn is nil in ms-bff")
+	}
+
+	client := pbgameengine.NewGameEngineClient(conn)
+
+	if client == nil {
+		log.Info().Msg("ms-game-engine client is nil in ms-bff")
 	}
 
 	return client, nil
