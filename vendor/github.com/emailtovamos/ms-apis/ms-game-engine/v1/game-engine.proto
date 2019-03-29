@@ -1,0 +1,18 @@
+// Command to generate pb file assuming there is a folder named api: 
+// protoc --go_out=plugins=grpc:. *.proto
+syntax = "proto3";
+package ms.gameengine.v1;
+
+option go_package = "gameengine";
+
+service GameEngine {
+    rpc GetSize(GetSizeRequest) returns (GetSizeResponse);
+}
+
+message GetSizeRequest {
+
+}
+
+message GetSizeResponse {
+    double size = 1;
+}

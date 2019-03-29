@@ -1,0 +1,28 @@
+// Command to generate pb file assuming there is a folder named api: 
+// protoc highscore.proto --go_out=plugins=grpc:api
+syntax = "proto3";
+package ms.highscore.v1;
+
+option go_package = "game";
+
+service Game {
+    rpc SetHighScore(SetHighScoreRequest) returns (SetHighScoreResponse);
+    rpc GetHighScore(GetHighScoreRequest) returns (GetHighScoreResponse);
+}
+
+
+message SetHighScoreRequest {
+    double highScore = 1;
+}
+
+message SetHighScoreResponse {
+    bool set = 1;
+}
+
+message GetHighScoreRequest {
+
+}
+
+message GetHighScoreResponse {
+    double highScore = 1;
+}
