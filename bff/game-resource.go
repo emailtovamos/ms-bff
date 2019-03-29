@@ -2,8 +2,8 @@ package bff
 
 import (
 	"context"
-	pbgameengine "github.com/teach/ms-apis/ms-game-engine/v1"
-	pbhighscore "github.com/teach/ms-apis/ms-highscore/v1"
+	pbgameengine "github.com/emailtovamos/ms-apis/ms-game-engine/v1"
+	pbhighscore "github.com/emailtovamos/ms-apis/ms-highscore/v1"
 
 	// "io/ioutil"
 	"github.com/rs/zerolog/log"

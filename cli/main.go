@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/rs/zerolog/log"
-	"github.com/teach/ms-bff/bff"
+	"github.com/emailtovamos/ms-bff/bff"
 	"github.com/gin-gonic/gin"
 )
 
