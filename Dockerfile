@@ -1,3 +1,4 @@
+# docker build --no-cache -t ms-bff:latest .
 # 1st stage: build Go binary
 
 FROM golang:1.10
