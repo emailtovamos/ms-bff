@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: &service-name ms-bff
+  labels: &labels
+    app: *service-name
+spec:
+  minReadySeconds: 1
+  selector:
+    matchLabels: *labels
+  replicas: 1
+  revisionHistoryLimit: 10
+  template: #template for pods
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+      - name: *service-name
+        image: emailtovamos/ms-bff:latest
+        command: ["./binary"]  # == ENTRYPOINT
+        args: 
+          - --address-ms-highscore=ms-highscore:50051
+          - --address-ms-game-engine=ms-game-engine:60051
