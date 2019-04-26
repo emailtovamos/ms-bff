@@ -21,3 +21,6 @@ spec:
         args: 
           - --address-ms-highscore=ms-highscore:50051
           - --address-ms-game-engine=ms-game-engine:60051
+        # ports:
+        # - name: bff-http
+        #   containerPort: 8081
