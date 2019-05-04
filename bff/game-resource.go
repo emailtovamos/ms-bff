@@ -90,6 +90,24 @@ func (gr *gameResource) GetSize(c *gin.Context) {
 
 }
 
+func (gr *gameResource) SetScore(c *gin.Context) {
+	if gr.gameEngineClient == nil {
+		log.Error().Msg("nil gameEngine client")
+	}
+
+	scoreString := c.Param("score")
+	scoreFloat64, _ := strconv.ParseFloat(scoreString, 64)
+
+	_, err := gr.gameEngineClient.SetScore(context.Background(), &pbgameengine.SetScoreRequest{
+		Score: scoreFloat64,
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Error while getting high score")
+		log.Panic()
+	}
+
+}
+
 func (gr *gameResource) HandleGet(c *gin.Context) {
 	bsString := strconv.FormatFloat(bestScore, 'e', -1, 64)
 	c.JSONP(200, gin.H{
