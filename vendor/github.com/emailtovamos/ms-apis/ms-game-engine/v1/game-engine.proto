@@ -1,5 +1,6 @@
 // Command to generate pb file assuming there is a folder named api: 
 // protoc --go_out=plugins=grpc:. *.proto
+// https://github.com/golang/protobuf
 syntax = "proto3";
 package ms.gameengine.v1;
 
@@ -7,6 +8,8 @@ option go_package = "gameengine";
 
 service GameEngine {
     rpc GetSize(GetSizeRequest) returns (GetSizeResponse);
+    // SetScore rpc which will set the sizes in an array. This array will only save 4 sizes. 
+    rpc SetScore(SetScoreRequest) returns (SetScoreResponse);
 }
 
 message GetSizeRequest {
@@ -15,4 +18,12 @@ message GetSizeRequest {
 
 message GetSizeResponse {
     double size = 1;
+}
+
+message SetScoreRequest {
+    double score = 1;
+}
+
+message SetScoreResponse {
+    bool set = 1;
 }
