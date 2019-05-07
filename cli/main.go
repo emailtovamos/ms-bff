@@ -42,6 +42,7 @@ func main() {
 	router.GET("/getbs", gr.GetHighScore)
 	router.GET("/setbs/:hs", gr.SetHighScore)
 	router.GET("/getsize", gr.GetSize)
+	router.GET("/setscore/:score", gr.SetScore)
 	err = router.Run(*serverAddr)
 
 	if err != nil {
