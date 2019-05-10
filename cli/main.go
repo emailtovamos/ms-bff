@@ -28,17 +28,7 @@ func main() {
 	}
 	gr := bff.NewGameResource(gameClient, gameEngineClient)
 
-	// Let's first get things running without the bff actually connecting to ms-highscore
-	// But rather bff acts like a fake full backend and it itself returns some highscore
-	// If this works fine then only start ms-highscore service and then connect bff and this
-	// gr := bff.NewGameResourceTemp()
-	// Create ms-frontend which is basically deploy-game repository only with html/js
-	// Then make ms-frontend connect to ms-bff to get the highscore and also set highscore.
-	// Currently I only check if ms-bff and ms-highscore are connecting correctly is through postman
-	// ms-frontend will basically be same as deploy-game as it already does ajax call to connect to a url
-
 	router = gin.Default()
-	// router.GET("/getbs", gr.HandleGet)
 	router.GET("/getbs", gr.GetHighScore)
 	router.GET("/setbs/:hs", gr.SetHighScore)
 	router.GET("/getsize", gr.GetSize)
