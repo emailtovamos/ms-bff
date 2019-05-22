@@ -10,8 +10,6 @@ import (
 	"strconv"
 )
 
-var bestScore = 999999.0
-
 func NewGameResource(gameClient pbhighscore.GameClient, gameEngineClient pbgameengine.GameEngineClient) *gameResource {
 	return &gameResource{
 		gameClient:       gameClient,
@@ -19,16 +17,8 @@ func NewGameResource(gameClient pbhighscore.GameClient, gameEngineClient pbgamee
 	}
 }
 
-func NewGameResourceTemp() *gameResource {
-	return &gameResource{}
-}
-
 type gameResource struct {
 	gameClient       pbhighscore.GameClient
-	gameEngineClient pbgameengine.GameEngineClient
-}
-
-type gameEngineResource struct {
 	gameEngineClient pbgameengine.GameEngineClient
 }
 
@@ -93,6 +83,8 @@ func (gr *gameResource) SetScore(c *gin.Context) {
 	}
 
 }
+
+// Make NewGrpcGameEngineServiceClient and NewGrpcGameServiceClient together
 
 func NewGrpcGameServiceClient(serverAddr string) (pbhighscore.GameClient, error) {
 

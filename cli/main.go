@@ -7,10 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var router *gin.Engine
-var bestScore = 999999.0
-
 func main() {
+	var router *gin.Engine
 	grpcAddrHighScore := flag.String("address-ms-highscore", "localhost:50051", "The GRPC server address for highscore service")
 	grpcAddrGameEngine := flag.String("address-ms-game-engine", "localhost:60051", "The GRPC server address for game engine service")
 
